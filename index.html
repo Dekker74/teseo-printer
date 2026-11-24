@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Teseo Printer: multifunzione LED A4 da 440 € netti, 13 moduli riparabili, ricambi rigenerati e contratti Cura per scuole, studi e aziende.">
+<meta name="theme-color" content="#0B7B56">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230B7B56'/%3E%3Cpath d='M16 40V24h10a9 9 0 0 1 0 18H16Zm10-12v6h2a3 3 0 0 0 0-6h-2ZM44 24v16' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Teseo Printer · Stampa durevole, prezzi trasparenti</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#mainContent">Vai al contenuto principale</a>
+
+<!-- SCHERMATA DI ACCESSO INIZIALE -->
+<div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="auth-shell">
+    <section class="auth-pitch" aria-label="Perché Teseo Printer">
+      <div class="auth-brand"><span class="brand-mark" aria-hidden="true">T</span><span>Teseo Printer</span></div>
+      <p class="eyebrow light">Hardware riparabile · economia circolare</p>
+      <h1 id="authTitle">La stampante progettata per <em>durare.</em></h1>
+      <p class="auth-lead">Tredici moduli sostituibili, diagnostica guidata e ricambi rigenerati certificati. Un solo prezzo chiaro: <strong>440 € netti</strong> (536,80 € IVA inclusa).</p>
+      <ul class="auth-points">
+        <li><span aria-hidden="true">✓</span> 13 moduli con Passaporto Digitale</li>
+        <li><span aria-hidden="true">✓</span> Ricambi rigenerati fino al 35% in meno</li>
+        <li><span aria-hidden="true">✓</span> Contratto Cura: interventi in 48 ore</li>
+      </ul>
+      <div class="auth-footnote">Per scuole, studi professionali e piccole aziende.</div>
+    </section>
+
+    <section class="auth-form-side" aria-label="Accesso all'area personale">
+      <div class="auth-card">
+        <p class="eyebrow">Area personale</p>
+        <h2>Bentornato in Teseo</h2>
+        <p class="muted small">Accedi per salvare ordini, piani e ticket di assistenza.</p>
+
+        <form id="signInForm" class="auth-form" novalidate>
+          <label for="siEmail">Email</label>
+          <input id="siEmail" name="email" type="email" autocomplete="email" placeholder="nome@azienda.it" required>
+          <label for="siPassword">Password</label>
+          <input id="siPassword" name="password" type="password" autocomplete="current-password" placeholder="La tua password" required>
+          <button class="btn btn-primary btn-block" type="submit">Accedi</button>
+        </form>
+
+        <form id="signUpForm" class="auth-form hidden" novalidate>
+          <label for="suName">Nome e cognome</label>
+          <input id="suName" name="full_name" type="text" autocomplete="name" placeholder="Mario Rossi" required>
+          <label for="suCompany">Azienda o scuola <span class="optional">(facoltativo)</span></label>
+          <input id="suCompany" name="company" type="text" autocomplete="organization" placeholder="Liceo Fermi">
+          <label for="suEmail">Email</label>
+          <input id="suEmail" name="email" type="email" autocomplete="email" placeholder="nome@azienda.it" required>
+          <label for="suPassword">Password</label>
+          <input id="suPassword" name="password" type="password" autocomplete="new-password" placeholder="Almeno 6 caratteri" required>
+          <button class="btn btn-primary btn-block" type="submit">Crea account</button>
+        </form>
+
+        <p id="authMsg" class="auth-msg" role="status" aria-live="polite"></p>
+        <p class="auth-switch"><span id="signInHint">Non hai un account?</span> <button type="button" class="link-btn" id="toSignUp">Crea account</button><button type="button" class="link-btn hidden" id="toSignIn">Accedi</button></p>
+        <div class="auth-divider"><span>oppure</span></div>
+        <button type="button" class="btn btn-ghost btn-block" id="guestBtn">Esplora come ospite</button>
+        <p class="tiny muted center">L'ospite può usare tutte le funzioni dimostrative. Gli acquisti restano locali.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- APPLICATION -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#mainContent" aria-label="Teseo Printer, torna all'inizio">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span class="brand-text"><strong>Teseo Printer</strong><small>Stampa durevole, prezzi chiari</small></span>
+    </a>
+    <div class="header-tools">
+      <span class="status-chip" id="headerStatus"><span class="status-dot" aria-hidden="true"></span><span>Stampante non connessa</span></span>
+      <button type="button" class="tool-btn" id="vatBtn" aria-pressed="false" title="Mostra prezzi con IVA inclusa o esclusa">
+        <span class="tool-icon" aria-hidden="true">€</span><span id="vatLabel">Prezzi netti</span>
+      </button>
+      <button type="button" class="tool-btn cart-tool" id="cartBtn" aria-label="Apri carrello">
+        <span class="tool-icon" aria-hidden="true">▣</span><span>Carrello</span><span class="count" id="cartBadge" hidden>0</span>
+      </button>
+      <div id="authArea" class="auth-area"></div>
+    </div>
+  </div>
+</header>
+
+<main id="mainContent">
+  <!-- HERO / LANDING -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Multifunzione LED A4 · 13 moduli riparabili</p>
+        <h1 id="heroTitle">Meno sprechi.<br><span>Più stampa.</span></h1>
+        <p class="hero-lead">Teseo M1 Pro nasce per essere riparata, non sostituita. Diagnostica semplice, moduli rigenerati certificati e contratti Cura pensati per scuole e aziende.</p>
+        <div class="hero-actions">
+          <button type="button" class="btn btn-primary" id="heroConnect">Connetti la stampante <span aria-hidden="true">→</span></button>
+          <button type="button" class="btn btn-outline" data-go="shop">Scopri i ricambi</button>
+        </div>
+        <dl class="hero-stats">
+          <div><dt>440 €</dt><dd>netti · 536,80 € IVA incl.</dd></div>
+          <div><dt>−23,3%</dt><dd>rispetto ai ~700 € dei concorrenti</dd></div>
+          <div><dt>13</dt><dd>moduli con passaporto digitale</dd></div>
+        </dl>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="device-card">
+          <div class="device-card-head"><span class="device-led"></span><span>Teseo M1 Pro</span><span class="device-tag">Sezione YZ</span></div>
+          <svg viewBox="0 0 420 300" class="device-svg" role="img" aria-label="Illustrazione dei moduli interni della stampante">
+            <rect x="10" y="30" width="400" height="244" rx="16" fill="#F3F1EC" stroke="#CBD9D6" stroke-width="2"/>
+            <rect x="22" y="42" width="376" height="220" rx="10" fill="none" stroke="#D8D5CE" stroke-width="3"/>
+            <rect x="26" y="8" width="368" height="24" rx="7" fill="#7A5CC8"/>
+            <path d="M60 232 C 46 232, 42 196, 56 174 C 70 152, 106 148, 158 148 L 300 148 C 328 148, 330 104, 296 98" fill="none" stroke="#0E9F6E" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="112" y="86" width="94" height="34" rx="7" fill="#D70B85"/>
+            <rect x="124" y="130" width="62" height="22" rx="5" fill="#B0E8EF"/>
+            <circle cx="222" cy="142" r="18" fill="#E91D2D"/>
+            <rect x="214" y="106" width="56" height="12" rx="3" fill="#0D2B33"/>
+            <rect x="286" y="132" width="58" height="40" rx="7" fill="#E35B22"/>
+            <rect x="356" y="116" width="34" height="86" rx="6" fill="#61676A"/>
+            <circle cx="216" cy="182" r="9" fill="#951A21"/>
+            <rect x="88" y="204" width="70" height="18" rx="4" fill="#00FFE8"/>
+            <rect x="250" y="204" width="78" height="18" rx="4" fill="#009FD7"/>
+            <rect x="30" y="234" width="200" height="30" rx="6" fill="#DDE2E4"/>
+            <rect x="242" y="234" width="148" height="30" rx="6" fill="#FFDD1A"/>
+            <rect x="58" y="198" width="22" height="22" rx="11" fill="#A97B50"/>
+          </svg>
+          <div class="device-card-foot"><span>Scanner CIS</span><span>Fusore</span><span>Rulli</span><span>Alimentatore</span></div>
+        </div>
+        <div class="float-chip chip-a"><strong>♻ Rigenerato</strong><small>fino a −35%</small></div>
+        <div class="float-chip chip-b"><strong>Cura attiva</strong><small>ricambi a 0 €</small></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="content-wrap">
+    <nav class="tab-nav" id="tabs" role="tablist" aria-label="Sezioni del sito">
+      <button type="button" role="tab" id="tab-stato" data-tab="stato" aria-controls="view-stato" aria-selected="true">Stato</button>
+      <button type="button" role="tab" id="tab-diag" data-tab="diag" aria-controls="view-diag" aria-selected="false">Diagnostica</button>
+      <button type="button" role="tab" id="tab-sint" data-tab="sint" aria-controls="view-sint" aria-selected="false">Sintomi</button>
+      <button type="button" role="tab" id="tab-shop" data-tab="shop" aria-controls="view-shop" aria-selected="false">Ricambi <span class="nav-count" id="navCartCount" hidden>0</span></button>
+      <button type="button" role="tab" id="tab-cura" data-tab="cura" aria-controls="view-cura" aria-selected="false">Contratto Cura</button>
+      <button type="button" role="tab" id="tab-assist" data-tab="assist" aria-controls="view-assist" aria-selected="false">Assistenza</button>
+      <button type="button" role="tab" id="tab-ordini" data-tab="ordini" aria-controls="view-ordini" aria-selected="false">Ordini demo</button>
+      <button type="button" role="tab" id="tab-prezzi" data-tab="prezzi" aria-controls="view-prezzi" aria-selected="false">Prezzi &amp; trasparenza</button>
+      <button type="button" role="tab" id="tab-account" data-tab="account" aria-controls="view-account" aria-selected="false" hidden>Account</button>
+    </nav>
+
+    <div id="alertBox" aria-live="polite"></div>
+
+    <!-- STATO -->
+    <section id="view-stato" data-view="stato" role="tabpanel" aria-labelledby="tab-stato" class="view grid-two">
+      <article class="card">
+        <header class="card-head">
+          <div><p class="eyebrow">Vista tecnica</p><h2>Sezione laterale YZ · 13 moduli</h2></div>
+          <p class="hint">Seleziona un modulo per scheda tecnica e passaporto digitale.</p>
+        </header>
+        <div class="svg-wrap" id="svgHost"></div>
+        <div class="legend">
+          <span><i class="swatch" style="background:#D70B85"></i>Toner</span>
+          <span><i class="swatch" style="background:#E91D2D"></i>Tamburo</span>
+          <span><i class="swatch" style="background:#B0E8EF"></i>Sviluppo</span>
+          <span><i class="swatch" style="background:#E35B22"></i>Fusore</span>
+          <span><i class="swatch" style="background:#A97B50"></i>Rulli</span>
+          <span><i class="swatch" style="background:#0D2B33"></i>LED</span>
+          <span><i class="swatch" style="background:#009FD7"></i>Controller</span>
+          <span><i class="swatch" style="background:#7A5CC8"></i>Scanner</span>
+        </div>
+        <p class="tiny muted">Stato sensori: <span class="pill ok">OK</span> <span class="pill warn">In esaurimento</span> <span class="pill bad">Guasto</span> <span class="pill na">Da verificare</span></p>
+      </article>
+      <article class="card">
+        <header class="card-head"><div><p class="eyebrow">Dispositivo</p><h2>Scheda macchina</h2></div></header>
+        <div class="kv" id="devInfo"></div>
+        <h3 class="section-subtitle">Moduli sostituibili <span class="count-inline">13</span></h3>
+        <div class="module-list" id="modList"></div>
+      </article>
+    </section>
+
+    <!-- DIAGNOSTICA -->
+    <section id="view-diag" data-view="diag" role="tabpanel" aria-labelledby="tab-diag" class="view hidden grid-two">
+      <article class="card">
+        <header class="card-head"><div><p class="eyebrow">Strumenti</p><h2>Diagnostica completa</h2></div></header>
+        <p class="muted">Interroga i 13 moduli: sensori ottici, scanner, contatori di cicli, frizione fronte-retro, tensioni e temperature. Simulazione di circa 15 secondi.</p>
+        <div class="row">
+          <button type="button" class="btn btn-primary" id="runDiag">Avvia diagnostica</button>
+          <span class="muted small" id="diagPct" aria-live="polite"></span>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Avanzamento diagnostica" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="diagProgress"><i id="diagBar"></i></div>
+        <div class="console" id="console" aria-live="polite">In attesa…</div>
+      </article>
+      <article class="card" id="diagResult"><h2>Risultato</h2><p class="muted">Avvia la diagnostica per vedere quale modulo va sostituito.</p></article>
+    </section>
+
+    <!-- SINTOMI -->
+    <section id="view-sint" data-view="sint" role="tabpanel" aria-labelledby="tab-sint" class="view hidden grid-two">
+      <article class="card">
+        <header class="card-head"><div><p class="eyebrow">Risoluzione problemi</p><h2>Cosa noti?</h2></div></header>
+        <p class="muted">Seleziona uno o più sintomi: stimiamo i moduli coinvolti e proponiamo un test mirato.</p>
+        <div class="chips" id="symChips" role="group" aria-label="Sintomi disponibili"></div>
+      </article>
+      <article class="card">
+        <header class="card-head"><div><p class="eyebrow">Analisi</p><h2>Moduli sospetti</h2></div></header>
+        <div id="candBox"><p class="muted">Nessun sintomo selezionato.</p></div>
+      </article>
+    </section>
+
+    <!-- RICAMBI -->
+    <section id="view-shop" data-view="shop" role="tabpanel" aria-labelledby="tab-shop" class="view hidden">
+      <article class="card intro-card">
+        <div class="intro-row">
+          <div><p class="eyebrow">Catalogo circolare</p><h2>13 ricambi, nuovi e rigenerati</h2>
+            <p class="muted">Listino definito dal business plan, IVA esclusa. Il rigenerato è collaudato al 100% e coperto da 24 mesi di garanzia.</p></div>
+          <div class="row">
+            <div class="segmented" id="shopFilter" role="group" aria-label="Filtra ricambi">
+              <button type="button" class="seg on" data-filter="all" aria-pressed="true">Tutti (13)</button>
+              <button type="button" class="seg" data-filter="regen" aria-pressed="false">Solo rigenerati</button>
+            </div>
+            <button type="button" class="btn btn-outline" id="cartBtnShop">Carrello <span id="cartCountShop">0</span></button>
+          </div>
+        </div>
+      </article>
+      <div id="curaShopBanner"></div>
+      <div class="product-grid" id="shopGrid"></div>
+      <p class="tiny muted mt">Ogni modulo rigenerato è ricondizionato nei laboratori Teseo con componenti di usura nuovi. La cartuccia toner e il tamburo sono vuoti a rendere.</p>
+    </section>
+
+    <!-- CURA -->
+    <section id="view-cura" data-view="cura" role="tabpanel" aria-labelledby="tab-cura" class="view hidden">
+      <article class="card intro-card">
+        <div class="intro-row">
+          <div><p class="eyebrow">Manutenzione</p><h2>Contratto Cura</h2><p class="muted" id="curaHeaderDesc"></p></div>
+          <button type="button" class="btn btn-outline" id="cartBtnCura">Carrello <span id="cartCountCura">0</span></button>
+        </div>
+      </article>
+      <div id="curaStatusBox"></div>
+      <div class="plan-grid" id="planGrid"></div>
+    </section>
+
+    <!-- ASSISTENZA -->
+    <section id="view-assist" data-view="assist" role="tabpanel" aria-labelledby="tab-assist" class="view hidden">
+      <article class="card intro-card">
+        <p class="eyebrow">Supporto</p><h2>Assistenza clienti</h2>
+        <p class="muted">Risposte rapide, canali diretti e ticket tracciati nell'area personale.</p>
+      </article>
+      <div class="grid-two">
+        <article class="card">
+          <header class="card-head"><div><p class="eyebrow">FAQ</p><h2>Domande frequenti</h2></div></header>
+          <label class="search-field" for="faqSearch"><span aria-hidden="true">⌕</span><span class="sr-only">Cerca nelle domande frequenti</span>
+            <input id="faqSearch" type="search" placeholder="Cerca ad esempio “toner”, “Cura”, “reso”…" autocomplete="off">
+          </label>
+          <p class="tiny muted"><span id="faqCount">0</span> risultati</p>
+          <div id="faqList" class="faq-list"></div>
+        </article>
+        <div class="stack">
+          <article class="card">
+            <p class="eyebrow">Contatti</p><h2>Parliamone</h2>
+            <div class="contact-list">
+              <div class="contact-item"><span class="contact-icon" aria-hidden="true">✉</span><div><b>Email</b><a href="mailto:assistenza@teseoprinter.it">assistenza@teseoprinter.it</a></div></div>
+              <div class="contact-item"><span class="contact-icon" aria-hidden="true">☎</span><div><b>Telefono</b><a href="tel:+390000000000">+39 000 000 0000</a><small class="muted">Da sostituire con il numero operativo</small></div></div>
+              <div class="contact-item"><span class="contact-icon" aria-hidden="true">◷</span><div><b>Orari</b><span>Lun–Ven · 09:00–18:00</span><small class="muted">Risposta entro 1 giorno lavorativo</small></div></div>
+            </div>
+          </article>
+          <article class="card">
+            <p class="eyebrow">Richiesta</p><h2>Apri un ticket</h2>
+            <p class="muted small">Per inviare la richiesta devi avere un account: così puoi seguirne lo stato dall'Area Account.</p>
+            <form id="ticketForm" class="form-grid" novalidate>
+              <div class="field full"><label for="tkSubject">Oggetto</label><input id="tkSubject" name="subject" type="text" placeholder="Es. Toner esaurito dopo 500 pagine" required></div>
+              <div class="field full"><label for="tkCategory">Categoria</label>
+                <select id="tkCategory" name="category" required>
+                  <option value="diagnostica">Diagnostica e guasti</option>
+                  <option value="ricambi">Ricambi e resi</option>
+                  <option value="cura">Contratto Cura</option>
+                  <option value="ordini">Ordini e fatture</option>
+                  <option value="altro">Altro</option>
+                </select>
+              </div>
+              <div class="field full"><label for="tkSerial">Numero di serie <span class="optional">(facoltativo)</span></label><input id="tkSerial" name="serial" type="text" placeholder="TP-26-12345" autocomplete="off"></div>
+              <div class="field full"><label for="tkMessage">Messaggio</label><textarea id="tkMessage" name="message" rows="5" placeholder="Descrivi il problema, il codice errore e cosa hai già provato…" required></textarea></div>
+              <div class="full"><button type="submit" class="btn btn-primary" id="tkSubmit">Invia richiesta</button></div>
+              <p id="ticketFormMsg" class="form-msg full" role="status" aria-live="polite"></p>
+            </form>
+          </article>
+        </div>
+      </div>
+      <article class="card mt" id="myTicketsBox"></article>
+    </section>
+
+    <!-- ORDINI DEMO -->
+    <section id="view-ordini" data-view="ordini" role="tabpanel" aria-labelledby="tab-ordini" class="view hidden">
+      <article class="card intro-card"><p class="eyebrow">Simulazione</p><h2>Ordini e resi demo</h2><p class="muted">Questi ordini sono locali e servono a seguire il ciclo di sostituzione. Gli acquisti reali sono nell'Area Account.</p></article>
+      <div id="ordersBox"></div>
+    </section>
+
+    <!-- PREZZI -->
+    <section id="view-prezzi" data-view="prezzi" role="tabpanel" aria-labelledby="tab-prezzi" class="view hidden">
+      <article class="card intro-card"><p class="eyebrow">Trasparenza</p><h2>Prezzi &amp; trasparenza</h2><p class="muted">Tutti gli importi qui sotto seguono il toggle Netto / Lordo dell'header. IVA 22%.</p></article>
+      <div id="priceTableBox"></div>
+      <article class="card mt">
+        <h3>Fonti del listino</h3>
+        <ul class="source-list">
+          <li><b>2_Ipotesi, righe 46-53</b> — prezzo macchina 440 € netti, IVA 22%, 536,80 € IVA inclusa, sconto triennale 18%, competitor ~700 €.</li>
+          <li><b>6_Contratti_Cura, righe 209-210</b> — canoni 59 €/anno e 159 € anticipati (53 €/anno), risparmio 10,2%.</li>
+          <li><b>3_Componenti, righe 99-115</b> — listino dei 13 ricambi nuovi e rigenerati.</li>
+          <li><b>2_Ipotesi, riga 82</b> — ricavo ricorrente base 52 €/anno per macchina in servizio.</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ACCOUNT -->
+    <section id="view-account" data-view="account" role="tabpanel" aria-labelledby="tab-account" class="view hidden">
+      <div id="accountBox"></div>
+    </section>
+
+    <details class="demo-panel">
+      <summary>Pannello dimostrativo · simula un guasto</summary>
+      <div class="row">
+        <label for="demoSel">Modulo guasto</label>
+        <select id="demoSel"></select>
+        <button type="button" class="btn btn-sm btn-outline" id="demoApply">Applica scenario</button>
+        <span class="tiny muted">La diagnostica e le guide sono simulazioni didattiche.</span>
+      </div>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div><strong>Teseo Printer</strong> · Multifunzione LED A4 riparabile</div>
+  <div class="footer-links"><a href="mailto:assistenza@teseoprinter.it">Assistenza</a><button type="button" class="link-btn" data-go="prezzi">Prezzi &amp; trasparenza</button></div>
+  <p class="tiny">Sito statico dimostrativo · nessun pagamento reale · dati salvi solo dopo la configurazione di Supabase.</p>
+</footer>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button type="button" class="modal-close" id="closeModal" aria-label="Chiudi finestra">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
