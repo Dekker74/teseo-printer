@@ -348,6 +348,14 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="config.js"></script>
+<script>
+  // Applica subito il logo ufficiale, senza attendere il modulo app.js.
+  if (window.TESEO_LOGO) {
+    document.querySelectorAll('img[data-logo]').forEach(function (img) { img.src = window.TESEO_LOGO; });
+    var icon = document.querySelector('link[data-logo-favicon]');
+    if (icon) icon.href = window.TESEO_LOGO;
+  }
+</script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -269,11 +269,6 @@
   /* ---------- Utility ---------- */
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
-  // Logo ufficiale fornito come data-URI in config.js (nessun file binario nel repo).
-  if(window.TESEO_LOGO){
-    $$('img[data-logo]').forEach(img=>{ img.src=window.TESEO_LOGO; });
-    const icon=$('link[data-logo-favicon]'); if(icon) icon.href=window.TESEO_LOGO;
-  }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
   const round2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
