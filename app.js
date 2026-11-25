@@ -214,6 +214,13 @@
   ];
   const PLAN_BY = Object.fromEntries(CURA_PLANS.map(p => [p.id, p]));
 
+  /* Metodi del checkout dimostrativo: nessuna transazione reale viene inviata. */
+  const PAY_METHODS = [
+    { id:'carta', icon:'💳', name:'Carta di credito / debito', desc:'Carta demo 4242 4242 4242 4242 · scadenza 12/30 · CVV 123' },
+    { id:'bonifico', icon:'🏦', name:'Bonifico bancario', desc:'Coordinate demo IT60 X054 2811 1010 0000 0123 456' },
+    { id:'paypal', icon:'🅿️', name:'PayPal', desc:'Pagamento simulato, nessun accesso o addebito reale' }
+  ];
+
   const SYMPTOMS = [
     { id:'faded', t:'Stampa chiara o sbiadita', w:{toner:.5, drum:.35, transport:.15} },
     { id:'smear', t:'Il toner si cancella con il dito', w:{fuser:.85, psu:.15} },
@@ -241,7 +248,8 @@
     { q:'Come invio una richiesta di assistenza?', a:`Nella scheda Assistenza compili il form con oggetto, categoria, messaggio e numero di serie opzionale. Devi essere autenticato: il ticket compare poi nella tabella dei ticket dell’Area Account. Puoi anche scrivere a assistenza@teseoprinter.it.`, k:'ticket assistenza form email login' },
     { q:'Quanto tempo serve per sostituire un modulo?', a:`Da 1 a 10 minuti secondo il modulo: toner 1 min, tamburo 2 min, fusore 8 min. Ogni scheda modulo include una guida passo-passo e le indicazioni di sicurezza (interblocco termico e alta tensione).`, k:'sostituzione guida tempi fusore toner' },
     { q:'Il prezzo include l’IVA?', a:`Di default i prezzi sono netti (IVA esclusa 22%). Con il pulsante “Prezzi netti / IVA inclusa” nell’header puoi vedere tutti gli importi con IVA inclusa: macchina 536,80 €, Cura annuale 71,98 €.`, k:'iva prezzi netti lordo toggle' },
-    { q:'Che cos’è il Passaporto Digitale di Prodotto?', a:`Ogni modulo ha un QR generato dal suo codice e dal numero di serie della macchina: riporta materiali, istruzioni di sostituzione e tracciabilità di fine vita, in linea con il regolamento ESPR.`, k:'passaporto digitale qr espr materiali' }
+    { q:'Che cos’è il Passaporto Digitale di Prodotto?', a:`Ogni modulo ha un QR generato dal suo codice e dal numero di serie della macchina: riporta materiali, istruzioni di sostituzione e tracciabilità di fine vita, in linea con il regolamento ESPR.`, k:'passaporto digitale qr espr materiali' },
+    { q:'Come funziona il pagamento sul sito?', a:`È una simulazione didattica: nella sezione Pagamenti scegli carta, bonifico o PayPal e confermi con dati di fantasia. Nessun importo viene addebitato e nessun dato bancario viene inviato. L’ordine demo compare comunque nel tuo account se hai effettuato l’accesso.`, k:'pagamento demo carta bonifico paypal addebito ricevuta' }
   ];
 
   /* ---------- Stato applicativo ---------- */
@@ -252,7 +260,7 @@
     pages: 24500 + Math.floor(Math.random()*25000),
     cart:[], orders:[], purchases:[], tickets:[],
     symSel:new Set(), tab:'stato',
-    vatIncluded:false, curaPlan:'none', shopFilter:'all',
+    vatIncluded:false, curaPlan:'none', shopFilter:'all', payment:null,
     selectedCond:Object.fromEntries(MODULES.map(m=>[m.id,'regen'])),
     guest:false, faqQuery:''
   };
@@ -261,6 +269,11 @@
   /* ---------- Utility ---------- */
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
+  // Logo ufficiale fornito come data-URI in config.js (nessun file binario nel repo).
+  if(window.TESEO_LOGO){
+    $$('img[data-logo]').forEach(img=>{ img.src=window.TESEO_LOGO; });
+    const icon=$('link[data-logo-favicon]'); if(icon) icon.href=window.TESEO_LOGO;
+  }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
   const round2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
@@ -573,7 +586,7 @@
   function renderAll(){
     renderHeader(); renderAlert(); renderSvg(); renderDev(); renderList();
     renderDiagResult(); renderSym(); renderShop(); renderCura(); renderOrders();
-    renderCartBadge(); renderAssist(); renderAccount(); renderPrices();
+    renderCartBadge(); renderAssist(); renderAccount(); renderPrices(); renderPayments();
   }
 
   function renderAlert(){
@@ -881,11 +894,71 @@
       if(d<0 && (item.qty||1)<=1) S.cart.splice(i,1); else item.qty=(item.qty||1)+d;
       renderAll(); openCart();
     });
-    $('#checkout').onclick=checkout;
+    $('#checkout').onclick=openPayment;
   }
 
-  async function checkout(){
-    const btn=$('#checkout'); if(btn) btn.disabled=true;
+  /* Checkout dimostrativo: raccoglie un metodo di pagamento finto, poi finalizza l'ordine. */
+  function openPayment(){
+    if(!S.cart.length){ toast('Il carrello è vuoto.'); return; }
+    const planEntry=S.cart.find(c=>c.type==='plan');
+    const total=cartTotalNet();
+    const benefits=planEntry && planEntry.id!=='none'
+      ? `<div class="pay-benefits"><h3>Vantaggi attivi con ${esc(PLAN_BY[planEntry.id].name)}</h3>${benefitGrid(paidPlanBenefits(planEntry.id))}</div>`
+      : '';
+    modal(`<p class="eyebrow">Checkout · passaggio 2 di 2</p><h2>Pagamento demo</h2>
+      <div class="alert info"><b>🔒</b><div class="grow"><b>Nessun addebito reale.</b> Usa dati di fantasia: carta demo 4242 4242 4242 4242, scadenza 12/30, CVV 123.</div></div>
+      ${benefits}
+      <h3 class="mt">Metodo di pagamento</h3>
+      <div class="pay-layout" id="payMethods">${paymentMethodRadios()}</div>
+      <form id="payForm" novalidate>
+        <div class="pay-form-grid" id="payCardFields">
+          <div class="full"><label for="payName">Intestatario della carta</label><input id="payName" type="text" autocomplete="cc-name" placeholder="Mario Rossi"></div>
+          <div class="full"><label for="payNumber">Numero carta</label><input id="payNumber" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" maxlength="23"></div>
+          <div><label for="payExp">Scadenza</label><input id="payExp" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5"></div>
+          <div><label for="payCvv">CVV</label><input id="payCvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"></div>
+        </div>
+        <div class="pay-form-grid">
+          <div class="full"><label for="payEmail">Email per la ricevuta (facoltativa)</label><input id="payEmail" type="email" autocomplete="email" placeholder="nome@azienda.it" value="${user?esc(user.email||''):''}"></div>
+        </div>
+        <p id="payMsg" class="form-msg full" role="status" aria-live="polite"></p>
+      </form>
+      <div class="pay-total"><span>Totale (${vatSuffix()})<br><span class="tiny">IVA ${S.vatIncluded?'inclusa':'esclusa 22%'} · pagamento simulato</span></span><b>${fmt(total)}</b></div>
+      <div class="row mt" style="justify-content:flex-end;gap:10px"><button type="button" class="btn btn-ghost" data-close>Annulla</button><button type="button" class="btn btn-primary" id="payConfirm">Paga ${fmt(total)} (demo)</button></div>
+      <p class="pay-note">Nessun dato viene inviato a banche o circuiti di pagamento: questa schermata mostra solo il flusso di acquisto.</p>`);
+
+    const cardFields=$('#payCardFields');
+    const syncFields=()=>{ if(cardFields) cardFields.hidden=String($('#payMethods input:checked').value)!=='carta'; };
+    $$('#payMethods input').forEach(r=>r.addEventListener('change',syncFields));
+    syncFields();
+
+    $('#payConfirm').onclick=async ()=>{
+      const msg=$('#payMsg'); msg.className='form-msg full';
+      const method=$('#payMethods input:checked').value;
+      let last4='';
+      if(method==='carta'){
+        const name=$('#payName').value.trim();
+        const num=$('#payNumber').value.replace(/\D/g,'');
+        const exp=$('#payExp').value.trim();
+        const cvv=$('#payCvv').value.trim();
+        if(!name || num.length<12 || !/^\d{2}\/\d{2}$/.test(exp) || !/^\d{3,4}$/.test(cvv)){
+          msg.textContent='Controlla i dati della carta demo: numero (almeno 12 cifre), scadenza MM/AA e CVV.';
+          msg.classList.add('error'); $('#payNumber').focus(); return;
+        }
+        last4=num.slice(-4);
+      }
+      const email=$('#payEmail').value.trim();
+      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        msg.textContent='Inserisci un indirizzo email valido per la ricevuta.';
+        msg.classList.add('error'); $('#payEmail').focus(); return;
+      }
+      S.payment={method,last4,email:email||'ospite'};
+      const confirmBtn=$('#payConfirm'); confirmBtn.disabled=true; confirmBtn.textContent='Elaboramento demo…';
+      await new Promise(r=>setTimeout(r,450));
+      finalizeOrder();
+    };
+  }
+
+  async function finalizeOrder(){
     const orderCode='ORD-'+Date.now().toString().slice(-7);
     const planEntry=S.cart.find(c=>c.type==='plan');
     const plan=planEntry?planEntry.id:S.curaPlan;
@@ -922,8 +995,15 @@
     const total=cartTotalNet();
     S.cart=[]; renderAll();
 
+    const pay=S.payment||{method:'demo',last4:'',email:''};
+    const payName={carta:'Carta demo',bonifico:'Bonifico demo',paypal:'PayPal demo'}[pay.method]||'Pagamento demo';
+    const paymentLine=`<div class="alert ok"><b>💳</b><div class="grow"><b>${payName} confermato</b> · nessun addebito reale${pay.last4?` · carta •••• ${esc(pay.last4)}`:''}${pay.email && pay.email!=='ospite'?` · ricevuta a ${esc(pay.email)}`:''}</div></div>`;
+    S.payment=null;
+
     modal(`<p class="eyebrow">Conferma</p><h2>Ordine ${orderCode} ✓</h2>
       <p>Totale <b>${fmt(total)}</b> (${vatSuffix()}).</p>
+      ${paymentLine}
+      ${planEntry && planEntry.id!=='none'?`<div class="pay-benefits"><h3>Vantaggi del piano attivo</h3>${benefitGrid(paidPlanBenefits(planEntry.id))}</div>`:''}
       ${saved?`<div class="alert ok"><b>✓</b><div class="grow">Acquisto salvato nel tuo account${planEntry?`, piano <b>${esc(PLAN_BY[planEntry.id].name)}</b> attivato`:''}.</div></div>`:'<div class="alert warn"><b>!</b><div class="grow">Ordine demo locale: <b>accedi per salvare l’acquisto</b> e vedere lo stato nell’Area Account.</div></div>'}
       ${hasParts?`<div class="kv"><div><b>Consegna stimata</b>${dateFmt(Date.now()+2*864e5)}</div><div><b>Codice reso</b>${esc(ret)}</div></div>`:''}
       <div class="row" style="justify-content:flex-end"><button type="button" class="btn btn-outline" data-go="shop">Torna ai ricambi</button>${user?'<button type="button" class="btn btn-primary" data-go="account">Vai all’Area Account</button>':'<button type="button" class="btn btn-primary" data-login="Accedi per salvare l’acquisto e vedere i tuoi ordini">Accedi</button>'}</div>`);
@@ -1026,6 +1106,66 @@
         ${S.tickets.length?`<div class="table-wrap"><table><thead><tr><th>Oggetto</th><th>Categoria</th><th>Data</th><th>Stato</th></tr></thead><tbody>
           ${S.tickets.map(t=>`<tr><td><b>${esc(t.subject)}</b><div class="tiny muted">${esc(String(t.message).slice(0,100))}${String(t.message).length>100?'…':''}</div></td><td>${esc(t.category)}</td><td class="num">${dateFmt(t.created_at)}</td><td>${statusTicket(t.status)}</td></tr>`).join('')}
         </tbody></table></div>`:'<div class="empty"><p class="muted">Nessun ticket. Scrivici dalla sezione Assistenza clienti.</p><button type="button" class="btn btn-sm btn-outline" data-go="assist">Vai all’assistenza</button></div>'}
+      </article>`;
+  }
+
+  /* ---------- Pagamenti demo e vantaggi dei piani ---------- */
+  function paidPlanBenefits(planId){
+    const base=[
+      'Ricambi dei moduli coperti (usura, guasto e scanner) a 0 €',
+      'Sostituzione guidata in 48 ore, spedizione e reso gratuiti',
+      'Assistenza prioritaria e diagnostica inclusa'
+    ];
+    if(planId==='tri') return base.concat([
+      '18% di sconto sulla macchina: 360,80 € netti invece di 440 €',
+      'Una sola fattura anticipata per delibere e bandi MEPA'
+    ]);
+    return base.concat(['Canone 59 €/anno netti (71,98 € IVA inclusa)']);
+  }
+  function benefitGrid(items){
+    return `<ul class="benefit-grid">${items.map(b=>`<li><span>${esc(b)}</span></li>`).join('')}</ul>`;
+  }
+  function paymentMethodRadios(){
+    return PAY_METHODS.map(m=>`<label class="pay-method">
+      <input type="radio" name="payMethod" value="${m.id}" ${m.id==='carta'?'checked':''}>
+      <span><strong>${m.icon} ${esc(m.name)}</strong><small>${esc(m.desc)}</small></span>
+    </label>`).join('');
+  }
+  function renderPayments(){
+    const box=$('#paymentsBox'); if(!box) return;
+    const rows=[
+      ['Canone', 'Nessuno', `${fmt(C.annual.net)} / anno`, `${fmt(C.tri.net)} anticipati · 53 €/anno`],
+      ['Moduli di usura, guasto e scanner', `A listino`, '<b>0 €</b>', '<b>0 €</b>'],
+      ['Consumabili (toner e tamburo)', 'A listino', 'A listino', 'A listino'],
+      ['Spedizione e scatola di reso', fmtFixedGross(SHIPPING_GROSS), '<b>Gratis</b>', '<b>Gratis</b>'],
+      ['Tempi di intervento', 'Standard', 'Entro 48 ore', 'Entro 48 ore · priorità'],
+      ['Sconto 18% sulla macchina', '—', '—', '<b>440 € → 360,80 € netti</b>'],
+      ['Pagamento (demo)', '—', 'Carta / bonifico / PayPal', 'Carta / bonifico / PayPal']
+    ];
+    box.innerHTML=`
+      <article class="card">
+        <span class="demo-badge">Simulazione · nessun addebito</span>
+        <h3>Scegli come pagare</h3>
+        <p class="muted small">Il checkout è dimostrativo: puoi usare dati di fantasia. La ricevuta e lo stato dell’ordine sono simulati, ma se sei autenticato l’acquisto viene salvato nel tuo account.</p>
+        <div class="pay-layout">${paymentMethodRadios()}</div>
+        <div class="pay-benefits">
+          <h3>Cosa ottieni con un piano Cura a pagamento</h3>
+          ${benefitGrid(paidPlanBenefits('annual'))}
+        </div>
+        <div class="row mt" style="justify-content:flex-end;flex-wrap:wrap;gap:10px">
+          <button type="button" class="btn btn-outline" data-go="cura">Vedi i piani</button>
+          <button type="button" class="btn btn-primary" data-pay-plan="annual">Attiva Cura annuale · paga (demo)</button>
+          <button type="button" class="btn btn-blue" data-pay-plan="tri">Attiva Cura triennale · paga (demo)</button>
+        </div>
+      </article>
+      <article class="card mt">
+        <h3>Standard vs Cura: vantaggi inclusi</h3>
+        <p class="muted small">Il confronto segue il toggle Netto / IVA inclusa dell’header.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Vantaggio</th><th>Standard</th><th>Cura annuale</th><th>Cura triennale</th></tr></thead>
+          <tbody>${rows.map(r=>`<tr><td><b>${esc(r[0])}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody>
+        </table></div>
+        <p class="pay-note">I consumabili (toner e tamburo) restano a listino e vanno restituiti vuoti: il contratto copre i moduli di usura, guasto e scanner.</p>
       </article>`;
   }
 
@@ -1159,9 +1299,10 @@
 
   /* ---------- Azioni globali deleghe ---------- */
   document.addEventListener('click',e=>{
-    const t=e.target.closest('[data-go],[data-buy],[data-guide],[data-close],[data-login],[data-add-plan],[data-add-fix],[data-conn],[data-open-cart]');
+    const t=e.target.closest('[data-go],[data-buy],[data-guide],[data-close],[data-login],[data-add-plan],[data-add-fix],[data-conn],[data-open-cart],[data-pay-plan]');
     if(!t) return;
     if(t.dataset.close!==undefined){ closeModal(); return; }
+    if(t.dataset.payPlan){ addPlan(t.dataset.payPlan,false); go('pagamenti'); openPayment(); return; }
     if(t.dataset.go){ closeModal(); go(t.dataset.go); return; }
     if(t.dataset.login){ closeModal(); openAuthForAction(t.dataset.login==='true'?'':t.dataset.login); return; }
     if(t.dataset.conn){ connectVia(t.dataset.conn); return; }

@@ -7,9 +7,9 @@ Sito	statico B2B (HTML + CSS + JavaScript, nessun build e nessuna dipendenza npm
 - `index.html` — struttura, hero, navigazione a schede, modali e form.
 - `styles.css` — design system verde/blu, layout responsive, accessibilità e animazioni discrete.
 - `app.js` — listino `PRICE_BOOK`, logica applicativa, Supabase Auth e operazioni CRUD.
-- `config.js` — URL e chiave anonima del progetto Supabase collegato.
+- `config.js` — URL e chiave anonima del progetto Supabase collegato e logo ufficiale come data-URI.
 - `README.md` — queste istruzioni.
-- `supabase/schema.sql` — schemaSQL delle tre tabelle dedicate, già applicato al progetto Supabase.
+- `supabase/schema.sql` — schema SQL delle tre tabelle dedicate, già applicato al progetto Supabase.
 
 Il sito è distribuito su `https://teseo-printer.vercel.app` dal repository `Dekker74/teseo-printer`.
 
@@ -76,10 +76,12 @@ Fonti: business plan, fogli `2_Ipotesi` (righe 46-53), `6_Contratti_Cura` (righe
 - Ricerca per sintomi con stima dei moduli sospetti e test mirato.
 - 13 moduli cliccabili con scheda tecnica, passaporto digitale (QR generato lato client), note di rigenerazione e guide iFixit-like.
 - Carrello con condizione nuovo/rigenerato, quantità, Cura che azzera i moduli coperti e spedizione, checkout persistente per gli utenti autenticati.
+- Pagamento **demo** in due passaggi: carta (4242 4242 4242 4242), bonifico o PayPal, con ricevuta simulata e conferma d'ordine. Nessun addebito o dato bancario reale.
+- Sezione **Pagamenti** con confronto dei vantaggi dei piani: ricambi coperti a 0 €, spedizioni e resi gratuiti, interventi in 48 ore, sconto 18% sulla macchina con il triennale.
 - Assistenza clienti: FAQ ricercabile, canali di contatto, form ticket salvato in `teseo_support_tickets` per gli utenti autenticati.
 - Area Account: profilo, piano attivo, tutti gli acquisti da `teseo_purchases`, ticket da `teseo_support_tickets` e ordini demo locali.
 - Accessibilità: etichette associate, focus visibile, navigazione da tastiera, `aria-pressed`/`aria-selected`, live region per messaggi ed errori, `prefers-reduced-motion`.
 
 ## Nota
 
-La diagnostica e gli ordini demo sono simulazioni didattiche: non interrogano hardware reale e non effettuano pagamenti.
+La diagnostica, gli ordini e il pagamento sono simulazioni didattiche: non interrogano hardware reale, non contattano banche o circuiti di pagamento e non effettuano addebiti.

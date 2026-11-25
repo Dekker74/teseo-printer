@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Teseo Printer: multifunzione LED A4 da 440 € netti, 13 moduli riparabili, ricambi rigenerati e contratti Cura per scuole, studi e aziende.">
 <meta name="theme-color" content="#0B7B56">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230B7B56'/%3E%3Cpath d='M16 40V24h10a9 9 0 0 1 0 18H16Zm10-12v6h2a3 3 0 0 0 0-6h-2ZM44 24v16' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="data:," data-logo-favicon>
 <title>Teseo Printer · Stampa durevole, prezzi trasparenti</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -16,7 +16,7 @@
 <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-shell">
     <section class="auth-pitch" aria-label="Perché Teseo Printer">
-      <div class="auth-brand"><span class="brand-mark" aria-hidden="true">T</span><span>Teseo Printer</span></div>
+      <div class="auth-brand"><img class="brand-logo auth-logo" src="data:," data-logo alt="" aria-hidden="true"><span>Teseo Printer</span></div>
       <p class="eyebrow light">Hardware riparabile · economia circolare</p>
       <h1 id="authTitle">La stampante progettata per <em>durare.</em></h1>
       <p class="auth-lead">Tredici moduli sostituibili, diagnostica guidata e ricambi rigenerati certificati. Un solo prezzo chiaro: <strong>440 € netti</strong> (536,80 € IVA inclusa).</p>
@@ -68,7 +68,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="#mainContent" aria-label="Teseo Printer, torna all'inizio">
-      <span class="brand-mark" aria-hidden="true">T</span>
+      <img class="brand-logo" src="data:," data-logo alt="" aria-hidden="true">
       <span class="brand-text"><strong>Teseo Printer</strong><small>Stampa durevole, prezzi chiari</small></span>
     </a>
     <div class="header-tools">
@@ -139,6 +139,7 @@
       <button type="button" role="tab" id="tab-sint" data-tab="sint" aria-controls="view-sint" aria-selected="false">Sintomi</button>
       <button type="button" role="tab" id="tab-shop" data-tab="shop" aria-controls="view-shop" aria-selected="false">Ricambi <span class="nav-count" id="navCartCount" hidden>0</span></button>
       <button type="button" role="tab" id="tab-cura" data-tab="cura" aria-controls="view-cura" aria-selected="false">Contratto Cura</button>
+      <button type="button" role="tab" id="tab-pagamenti" data-tab="pagamenti" aria-controls="view-pagamenti" aria-selected="false">Pagamenti</button>
       <button type="button" role="tab" id="tab-assist" data-tab="assist" aria-controls="view-assist" aria-selected="false">Assistenza</button>
       <button type="button" role="tab" id="tab-ordini" data-tab="ordini" aria-controls="view-ordini" aria-selected="false">Ordini demo</button>
       <button type="button" role="tab" id="tab-prezzi" data-tab="prezzi" aria-controls="view-prezzi" aria-selected="false">Prezzi &amp; trasparenza</button>
@@ -282,6 +283,16 @@
         </div>
       </div>
       <article class="card mt" id="myTicketsBox"></article>
+    </section>
+
+    <!-- PAGAMENTI DEMO -->
+    <section id="view-pagamenti" data-view="pagamenti" role="tabpanel" aria-labelledby="tab-pagamenti" class="view hidden">
+      <article class="card intro-card">
+        <p class="eyebrow">Checkout dimostrativo</p>
+        <h2>Pagamenti (demo) e vantaggi dei piani</h2>
+        <p class="muted">Nessun addebito reale: scegli un metodo, inserisci dati di fantasia e ricevi la conferma simulata. Con un piano Cura attivo i vantaggi si applicano subito al carrello.</p>
+      </article>
+      <div id="paymentsBox"></div>
     </section>
 
     <!-- ORDINI DEMO -->
